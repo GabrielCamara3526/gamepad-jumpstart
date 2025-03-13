@@ -6,13 +6,26 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.updateTransition
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -21,6 +34,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -33,6 +47,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.mygamepads.ui.theme.MyGamepadsTheme
+import kotlinx.coroutines.delay
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -59,6 +74,8 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
     var userButton by remember { mutableStateOf("") }
 
 
+    var isVisible by remember { mutableStateOf(true)}
+    var isAnimating by remember { mutableStateOf(false)}
 
     val context = LocalContext.current
     // set up soundPool library
@@ -76,13 +93,51 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
     val correctSoundId = soundPool.load(context, R.raw.correctanswer, 1)
     var wrongSoundId = soundPool.load(context, R.raw.wronganswer, 1)
 
+    LaunchedEffect(key1 = isAnimating) {
+        if(isAnimating){
+            isVisible = false
+            delay(400)
+
+            // reset computer's choice
+            computerButton = ""
+            // computer chooses a new target button
+            computerButton += buttonsList.random()
+
+            isVisible = true
+            isAnimating = false
+        }
+    }
 
     Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ){
-        Text(text=computerButton)
+        AnimatedVisibility(
+            isVisible,
+            enter = slideInHorizontally(
+                initialOffsetX = { it },
+                animationSpec = tween(durationMillis = 150, easing = LinearOutSlowInEasing)
+            ),
+            exit = slideOutHorizontally(
+                targetOffsetX = { -it },
+                animationSpec = tween(durationMillis = 150, easing = LinearOutSlowInEasing)
+            )
+        ) {
+            Box(
+                modifier = Modifier
+                    .height(200.dp)
+                    .background(color = Color.Black)
+                    .fillMaxWidth(),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = computerButton,
+                    fontSize = 36.sp
+                )
+            }
+        }
+
     }
 
 
@@ -106,8 +161,7 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
 
                     soundPool.play(correctSoundId, 3f, 2f, 1, 0, 1f)
 
-                    computerButton = ""
-                    computerButton += buttonsList.random()
+                    isAnimating = true
                 }
                           },
 
@@ -141,11 +195,7 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
 
                     soundPool.play(correctSoundId, 3f, 2f, 1, 0, 1f)
 
-                    // reset computer's choice
-                    computerButton = ""
-                    // computer chooses a new target button
-                    computerButton += buttonsList.random()
-
+                    isAnimating = true
                 }
 
             },
@@ -171,10 +221,7 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
 
                     soundPool.play(correctSoundId, 3f, 2f, 1, 0, 1f)
 
-                    // reset computer's choice
-                    computerButton = ""
-                    // computer chooses a new target button
-                    computerButton += buttonsList.random()
+                    isAnimating = true
 
                 }
 
@@ -204,9 +251,7 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
 
                     soundPool.play(correctSoundId, 3f, 2f, 1, 0, 1f)
 
-                    computerButton = ""
-                    computerButton += buttonsList.random()
-
+                    isAnimating = true
                 }
             },
                 colors = ButtonDefaults.buttonColors(
