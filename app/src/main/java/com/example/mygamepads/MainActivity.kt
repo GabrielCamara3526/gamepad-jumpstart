@@ -70,11 +70,17 @@ class MainActivity : ComponentActivity() {
 fun Greeting(name: String, modifier: Modifier = Modifier) {
     //Buttons of Xbox layout
     val buttonsList = listOf("A", "B", "X", "Y")
+
+    // Player's target button
     var computerButton by remember { mutableStateOf(buttonsList.random()) }
+
+    // Player's button choice rememberer
     var userButton by remember { mutableStateOf("") }
 
-
+    // Box visibility variable
     var isVisible by remember { mutableStateOf(true)}
+
+    // Box animation effect variable
     var isAnimating by remember { mutableStateOf(false)}
 
     val context = LocalContext.current
@@ -96,7 +102,7 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
     LaunchedEffect(key1 = isAnimating) {
         if(isAnimating){
             isVisible = false
-            delay(400)
+            delay(750)
 
             // reset computer's choice
             computerButton = ""
@@ -117,23 +123,38 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
             isVisible,
             enter = slideInHorizontally(
                 initialOffsetX = { it },
-                animationSpec = tween(durationMillis = 150, easing = LinearOutSlowInEasing)
+                animationSpec = tween(durationMillis = 100, easing = LinearOutSlowInEasing)
             ),
             exit = slideOutHorizontally(
                 targetOffsetX = { -it },
-                animationSpec = tween(durationMillis = 150, easing = LinearOutSlowInEasing)
+                animationSpec = tween(durationMillis = 100, easing = LinearOutSlowInEasing)
             )
         ) {
             Box(
                 modifier = Modifier
                     .height(200.dp)
-                    .background(color = Color.Black)
+                    // Add swich case conditions to adapt box color to current text contained inside
+                    // Maybe add outlined effect to our box
+                    .background(
+                        when (computerButton) {
+                            "Y" -> Color.Yellow
+                            "X" -> Color.Blue
+                            "B" -> Color.Red
+                            else -> Color.Green
+                        }
+                    )
                     .fillMaxWidth(),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
                     text = computerButton,
-                    fontSize = 36.sp
+                    fontSize = 42.sp,
+                    color = when (computerButton){
+                        "Y" -> Color.Black
+                        "X" -> Color.White
+                        "B" -> Color.White
+                        else -> Color.Black
+                    }
                 )
             }
         }
@@ -243,7 +264,9 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
             horizontalArrangement = Arrangement.SpaceEvenly){
 
             // A Button
-            Button(onClick = {
+            Button(
+
+                onClick = {
                 userButton = ""
                 userButton += "A"
 
@@ -254,12 +277,15 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
                     isAnimating = true
                 }
             },
+
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color.Green,
                     contentColor = Color.Black,
                 ),
+
                 shape = CircleShape,
                 modifier = Modifier.size(75.dp)){
+                
                 Text("A", fontSize = 30.sp)
             }
 
