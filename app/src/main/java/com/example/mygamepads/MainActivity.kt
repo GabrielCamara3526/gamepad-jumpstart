@@ -101,7 +101,9 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
 
     LaunchedEffect(key1 = isAnimating) {
         if(isAnimating){
+            // hide our box
             isVisible = false
+
             delay(750)
 
             // reset computer's choice
@@ -109,6 +111,7 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
             // computer chooses a new target button
             computerButton += buttonsList.random()
 
+            // display box again
             isVisible = true
             isAnimating = false
         }
